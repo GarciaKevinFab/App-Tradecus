@@ -14,8 +14,7 @@ class _SearchBarState extends State<SearchBar> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController durationController = TextEditingController();
   final TextEditingController maxGroupSizeController = TextEditingController();
-  bool _isLoading =
-      false; // Para gestionar el estado de carga durante la búsqueda
+  bool _isLoading = false;
 
   void searchHandler() async {
     final String location = locationController.text.trim();
@@ -74,17 +73,22 @@ class _SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10),
-      margin: EdgeInsets.only(top: 50),
+      margin: EdgeInsets.only(top: 10), // Reducir el margen superior a 10px
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.15),
-            blurRadius: 48,
-            offset: Offset(0, 2),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color:
+              Colors.grey.withOpacity(0.7), // Hacer el borde un poco más oscuro
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -92,7 +96,7 @@ class _SearchBarState extends State<SearchBar> {
             child: TextField(
               controller: locationController,
               decoration: InputDecoration(
-                hintText: 'A dónde vas?',
+                prefixIcon: Icon(Icons.location_on),
                 border: InputBorder.none,
               ),
             ),
@@ -101,7 +105,7 @@ class _SearchBarState extends State<SearchBar> {
             child: TextField(
               controller: durationController,
               decoration: InputDecoration(
-                hintText: 'Duración en horas',
+                prefixIcon: Icon(Icons.access_time),
                 border: InputBorder.none,
               ),
               keyboardType: TextInputType.number,
@@ -111,7 +115,7 @@ class _SearchBarState extends State<SearchBar> {
             child: TextField(
               controller: maxGroupSizeController,
               decoration: InputDecoration(
-                hintText: 'Máximo de Personas',
+                prefixIcon: Icon(Icons.group),
                 border: InputBorder.none,
               ),
               keyboardType: TextInputType.number,

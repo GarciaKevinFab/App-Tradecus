@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 import '../shared/Newsletter.dart';
 import '../shared/TourCard.dart';
 import '../shared/SearchBar.dart' as custom;
-import '../shared/CommonSection.dart';
-import '../components/Layout/Layout.dart';
 
 class ToursPage extends StatefulWidget {
   @override
@@ -14,7 +12,7 @@ class ToursPage extends StatefulWidget {
 }
 
 class _ToursState extends State<ToursPage> {
-  final String BASE_URL = 'http://192.168.137.217:4000/api/v1';
+  static const String baseUrl = 'http://192.168.137.217:4000/api/v1';
   List<dynamic> tours = [];
   int currentPage = 0;
   int totalPages = 0;
@@ -27,10 +25,12 @@ class _ToursState extends State<ToursPage> {
   }
 
   void loadTours() async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
     try {
       final response =
-          await http.get(Uri.parse('$BASE_URL/tours?page=$currentPage'));
+          await http.get(Uri.parse('$baseUrl/tours?page=$currentPage'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -42,61 +42,96 @@ class _ToursState extends State<ToursPage> {
         throw Exception('Failed to load tours');
       }
     } catch (e) {
-      print('Error loading tours: $e');
+      debugPrint('Error loading tours: $e');
       setState(() {
         isLoading = false;
-        // Consider setting an error message or state here
       });
     }
   }
 
+  Widget buildLoadingIndicator() {
+    return Center(
+      child: SpinKitFadingCircle(
+        color: Colors.red, // Cambia el color a rojo aquí
+        size: 50.0,
+      ),
+    );
+  }
+
+  Widget buildPageIndicator() {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(8),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 8,
+        children: List.generate(totalPages, (index) {
+          return ChoiceChip(
+            label: Text('${index + 1}'),
+            selected: currentPage == index,
+            selectedColor:
+                Colors.red, // Color de fondo del elemento seleccionado
+            labelStyle: TextStyle(color: Colors.white), // Color del texto
+            backgroundColor: Colors.red
+                .withOpacity(0.5), // Color de fondo cuando no está seleccionado
+            onSelected: (bool selected) {
+              // ... el resto del código no cambia ...
+            },
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Layout(
-      bodyContent: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            CommonSection(title: 'Todos Los Tours', height: 50),
-            custom.SearchBar(),
-            if (isLoading)
-              Center(
-                  child: SpinKitFadingCircle(
-                      color: Theme.of(context).primaryColor, size: 50.0))
-            else
-              ListView.builder(
-                itemCount: tours.length,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) => TourCard(tour: tours[index]),
-              ),
-            if (totalPages > 1)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(totalPages, (index) {
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        currentPage = index;
-                        loadTours();
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: currentPage == index
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text('${index + 1}'),
-                    ),
-                  );
-                }),
-              ),
-            Newsletter(),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        title: Text(
+          'Todos Los Tours',
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(4.0),
+          child: Container(
+            color: Colors.red, // Color rojo para el borde
+            height: 4.0,
+          ),
+        ),
+      ),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: Container(
+              margin: EdgeInsets.only(
+                  bottom: 15.0), // Agregar margen hacia abajo de 15px
+              child: custom.SearchBar(),
+            ),
+          ),
+          isLoading
+              ? SliverFillRemaining(
+                  child: buildLoadingIndicator(),
+                )
+              : SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => TourCard(tour: tours[index]),
+                    childCount: tours.length,
+                  ),
+                ),
+          SliverToBoxAdapter(
+            child: buildPageIndicator(),
+          ),
+          SliverToBoxAdapter(
+            child: Newsletter(),
+          ),
+        ],
       ),
     );
   }

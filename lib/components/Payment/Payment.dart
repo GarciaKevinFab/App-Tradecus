@@ -1,14 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pay/pay.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import '../../auth_provider.dart';
 
 class Payment extends StatefulWidget {
   final dynamic tour;
   final int quantity;
   final double totalPrice;
   final dynamic booking;
-  final dynamic user;
   final List<String> dni;
   final List<Map<String, dynamic>> userData;
 
@@ -18,9 +20,9 @@ class Payment extends StatefulWidget {
     required this.quantity,
     required this.totalPrice,
     required this.booking,
-    required this.user,
     required this.dni,
     required this.userData,
+    required Map user,
   }) : super(key: key);
 
   @override
@@ -45,7 +47,36 @@ class _PaymentState extends State<Payment> {
   void onGooglePayResult(paymentResult) {
     Fluttertoast.showToast(msg: 'Pago realizado correctamente');
     print(paymentResult);
-    // Aquí puedes enviar el token de pago a tu servidor
+    sendPaymentDataToBackend(paymentResult); // Envía datos al backend
+  }
+
+  void sendPaymentDataToBackend(paymentResult) async {
+    final user = Provider.of<AuthProvider>(context, listen: false).currentUser;
+
+    Uri url = Uri.parse('http://192.168.137.217:4000/api/v1/payment/create');
+    try {
+      var response = await http.post(url,
+          body: json.encode({
+            'user': {'username': user.username, 'email': user.email},
+            'tourId': widget.tour['_id'],
+            'quantity': widget.quantity,
+            'totalPrice': widget.totalPrice,
+            'booking': widget.booking,
+            'dni': widget.dni,
+            'userData': widget.userData,
+            'paymentResult': paymentResult,
+          }),
+          headers: {'Content-Type': 'application/json'});
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        print('Payment data saved: ${responseData['paymentId']}');
+      } else {
+        throw Exception('Failed to save data');
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error al enviar datos: $e');
+    }
   }
 
   @override

@@ -6,10 +6,9 @@ class Header extends StatefulWidget implements PreferredSizeWidget {
   @override
   State<Header> createState() => _HeaderState();
 
-  // Ajustamos la altura preferida para acomodar el logo.
   @override
   Size get preferredSize =>
-      Size.fromHeight(50); // Asumiendo que el logo tiene una altura de 80px.
+      Size.fromHeight(100); // Ajustamos esto según sea necesario.
 }
 
 class _HeaderState extends State<Header> {
@@ -17,19 +16,32 @@ class _HeaderState extends State<Header> {
   Widget build(BuildContext context) {
     return AppBar(
       centerTitle: true,
-      backgroundColor:
-          Color.fromARGB(255, 228, 89, 24), // Color de fondo del AppBar
-      // Usamos un container para controlar mejor el tamaño del logo.
-      title: Container(
-        height: widget.preferredSize
-            .height, // Utilizamos la altura preferida para el container del logo.
-        child: Image.asset(
-          'assets/images/logo.png',
-          fit: BoxFit
-              .contain, // Hace que la imagen del logo mantenga sus proporciones.
+      titleSpacing:
+          0, // Elimina cualquier espaciado adicional alrededor del título.
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          color: Colors.white, // Fondo blanco para el AppBar.
+          border: Border(
+            bottom: BorderSide(
+                color: Colors.red,
+                width: 1), // Borde rojo delgado en la parte inferior.
+          ),
         ),
       ),
-      // Eliminamos todos los botones y acciones adicionales para un diseño limpio.
+      title: Container(
+        // Ajustamos el contenedor del logo para alinear el logo verticalmente.
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(
+            bottom:
+                12.0), // Espacio adicional para compensar el borde inferior.
+        child: Image.asset(
+          'assets/images/logo.png',
+          height: 50, // Altura específica del logo.
+        ),
+      ),
+      elevation: 0, // Elimina la sombra debajo del AppBar.
+      backgroundColor: Colors
+          .transparent, // Fondo transparente para mostrar el BoxDecoration.
     );
   }
 }

@@ -14,15 +14,19 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Escucha los cambios en el AuthProvider
+    final authProvider =
+        Provider.of<AuthProvider>(context); // listen: true por defecto
     final isLoggedIn = authProvider.currentUser.username.isNotEmpty;
 
     return BottomAppBar(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: navLinks.map((item) {
+          Widget iconButton;
           if (item['path'] == '/account') {
-            return IconButton(
+            // Cambia el ícono y la acción dependiendo del estado de sesión
+            iconButton = IconButton(
               icon: Icon(isLoggedIn ? Icons.person : Icons.login),
               onPressed: () {
                 if (isLoggedIn) {
@@ -37,11 +41,9 @@ class Footer extends StatelessWidget {
               },
             );
           } else {
-            return IconButton(
+            iconButton = IconButton(
               icon: Icon(item['icon']),
               onPressed: () {
-                if (ModalRoute.of(context)?.settings.name == item['path'])
-                  return;
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   item['path'],
                   ModalRoute.withName('/home'),
@@ -49,6 +51,7 @@ class Footer extends StatelessWidget {
               },
             );
           }
+          return iconButton;
         }).toList(),
       ),
     );

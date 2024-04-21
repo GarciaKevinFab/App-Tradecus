@@ -7,8 +7,8 @@ import './Pages/About.dart';
 import './Pages/Tours.dart';
 import './Pages/SearchResultList.dart';
 import './Pages/ThankYou.dart';
-import './Pages/Gallery.dart';
 import './Pages/Account.dart';
+import './Pages/UserProfile.dart';
 
 void main() async {
   await dotenv.load(fileName: '.env');
@@ -30,10 +30,10 @@ class MyApp extends StatelessWidget {
           '/home': (context) => HomePage(),
           '/about': (context) => AboutPage(),
           '/tours': (context) => ToursPage(),
-          '/gallery': (context) => GalleryPage(),
           '/thank-you': (context) => ThankYouPage(),
           '/search-results': (context) => SearchResultListPage(),
           '/account': (context) => AccountPage(),
+          '/profile': (context) => UserProfile(),
         },
       ),
     );
